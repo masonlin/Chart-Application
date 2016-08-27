@@ -19,14 +19,21 @@
 </head>
 <body onload="draw()">
   <h1>Les Misérables Relationship</h1>
+  <input type="button" onclick="focusRandom();" value="Focus on random node." style="width:300px;" id="btnFocus"><br/>
+  <input type="button" onclick="fitAnimated();" value="View all." style="width:300px;" id="btnZoom"> <br/>
   <div id="mynetwork"></div>
 
   <script>
+    let amountOfNodes = 0;
+    let network;
+
     function draw() {
       let aryNodes = [];
       let aryLinks = [];
 
       $.getJSON("miserables.json", function(json) {
+        amountOfNodes = json.nodes.length;
+
         //nodes
         for(let i = 0; i < json.nodes.length; i++){
           let sTemp = {id: i, label: json.nodes[i].name, group: json.nodes[i].group};
@@ -38,7 +45,7 @@
           let sTemp = {
                   from: json.links[i].source,
                   to: json.links[i].target,
-                  length: json.links[i].value * 50,
+                  length: json.links[i].value * 100,
                   label: json.links[i].value,
                   smooth: {
                       enabled: false,
@@ -70,25 +77,49 @@
             },
             physics: {
                 forceAtlas2Based: {
-                    gravitationalConstant: -26,
+                    gravitationalConstant: -70, //-26
                     centralGravity: 0.005,
                     springLength: 230,
-                    springConstant: 0.18
+                    springConstant: 0.3,  //0.18
                 },
                 maxVelocity: 146,
+                /*'barnesHut', 'repulsion', 'hierarchicalRepulsion', 'forceAtlas2Based'*/
                 solver: 'forceAtlas2Based',
                 timestep: 0.35,
-                stabilization: {iterations: 150}
+                stabilization: {iterations: 150},
             }
         };
 
         let container = document.getElementById('mynetwork');
-
-        let network = new vis.Network(container, data, options);
+        // let network = new vis.Network(container, data, options);
+        network = new vis.Network(container, data, options);
 
       });
     }
 
+
+    function focusRandom() {
+      let nodeId = Math.floor(Math.random() * amountOfNodes);
+      let options = {
+        scale: 2,
+        offset: {x:100,y:100},
+        animation: {
+          duration: 100,
+          easingFunction: 'easeInOutQuad'
+        }
+      };
+      network.focus(nodeId, options);
+    }
+
+    function fitAnimated() {
+      var options = {offset: {x:100,y:100},
+        duration: 100,
+        easingFunction: 'easeInOutQuad'
+      };
+      // statusUpdateSpan.innerHTML = 'Doing fit() Animation.';
+      // finishMessage = 'Animation finished.';
+      network.fit({animation:options});
+    }
 
   </script>
 </body>
