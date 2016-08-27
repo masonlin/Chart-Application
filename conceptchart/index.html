@@ -1,0 +1,95 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+  <title>Les Misérables</title>
+  <meta charset="utf-8">
+  <style>
+    #mynetwork {
+        width: 1500px;
+        height: 800px;
+        border: 1px solid lightgray;
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.min.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.min.css" rel="stylesheet" type="text/css" />
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+
+  <!-- <script src="../../googleAnalytics.js"></script> -->
+</head>
+<body onload="draw()">
+  <h1>Les Misérables Relationship</h1>
+  <div id="mynetwork"></div>
+
+  <script>
+    function draw() {
+      let aryNodes = [];
+      let aryLinks = [];
+
+      $.getJSON("miserables.json", function(json) {
+        //nodes
+        for(let i = 0; i < json.nodes.length; i++){
+          let sTemp = {id: i, label: json.nodes[i].name, group: json.nodes[i].group};
+          aryNodes.push(sTemp);
+        }
+
+        //links
+        for(let i = 0; i< json.links.length; i++){
+          let sTemp = {
+                  from: json.links[i].source,
+                  to: json.links[i].target,
+                  length: json.links[i].value * 50,
+                  label: json.links[i].value,
+                  smooth: {
+                      enabled: false,
+                      /*'dynamic', 'continuous', 'discrete', 'diagonalCross',
+                      'straightCross', 'horizontal', 'vertical', 'curvedCW',
+                      'curvedCCW', 'cubicBezier'*/
+                      type: 'discrete'
+                  },
+                  arrows: {
+                    to: json.links[i].target
+                  }
+              };
+          aryLinks.push(sTemp);
+        }
+
+        let data = {
+            nodes: aryNodes,
+            edges: aryLinks
+        };
+
+        let options = {
+            nodes: {
+                shape: 'dot',
+                size: 16,
+                shadow: true
+            },
+            edges: {
+              shadow:true
+            },
+            physics: {
+                forceAtlas2Based: {
+                    gravitationalConstant: -26,
+                    centralGravity: 0.005,
+                    springLength: 230,
+                    springConstant: 0.18
+                },
+                maxVelocity: 146,
+                solver: 'forceAtlas2Based',
+                timestep: 0.35,
+                stabilization: {iterations: 150}
+            }
+        };
+
+        let container = document.getElementById('mynetwork');
+
+        let network = new vis.Network(container, data, options);
+
+      });
+    }
+
+
+  </script>
+</body>
+</html>
