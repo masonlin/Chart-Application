@@ -1,0 +1,235 @@
+
+<!DOCTYPE HTML>
+<html>
+
+<head>
+  <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+  <meta content="utf-8" http-equiv="encoding">
+  <title>Graph2d | Basic Example</title>
+
+  <style type="text/css">
+    body, html {
+      font-family: sans-serif;
+    }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/sweetalert2/4.2.4/sweetalert2.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/sweetalert2/4.2.4/sweetalert2.min.css" rel="stylesheet" type="text/css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.min.js"></script>
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.js"></script> -->
+  <!-- <script src="./vis.js"></script> -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.min.css" rel="stylesheet" type="text/css" />
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<!-- <script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)})(window,document,'script','//www.google-analytics.com/analytics.js','ga');ga('create', 'UA-61231638-1', 'auto');ga('send', 'pageview');
+</script> -->
+</head>
+<body>
+  <h1>
+    HTC News
+  </h1>
+
+<br />
+<div id="visualization"></div>
+
+<script type="text/javascript">
+
+  let container = document.getElementById('visualization');
+
+  let aryNews = [];
+  let aryStock = [];
+  let aryTargetNews = [];
+  let aryTargetStock = [];
+
+  $.getJSON("HTC_2015.json", function(json_v) {
+    let items = [];
+    $.getJSON("htc_news.json", function(json_n) {
+      //htc news
+      for(let i = 0; i < json_n.news.length; i++){
+        // "headline": "開盤10分鐘╱開漲43點",
+        // "datetime_local": "2015/3/2",
+        // "content": "..."
+        let sTemp = {headline: json_n.news[i].headline,
+                     datetime_local: json_n.news[i].datetime_local,
+                     content: json_n.news[i].content};
+        aryNews.push(sTemp);
+      }
+
+      //htc values
+      for(let i = 0; i< json_v.quote.length; i++){
+        let sValueTemp = {content: `Symbol:    ${json_v.quote[i].Symbol} <BR>
+                                    Date:      ${json_v.quote[i].Date} <BR>
+                                    Open:      ${json_v.quote[i].Open} <BR>
+                                    High:      ${json_v.quote[i].High} <BR>
+                                    Low:       ${json_v.quote[i].Low} <BR>
+                                    Close:     ${json_v.quote[i].Close} <BR>
+                                    Volume:    ${json_v.quote[i].Volume} <BR>
+                                    Adj_Close: ${json_v.quote[i].Adj_Close}`,
+                          Date: json_v.quote[i].Date};
+        aryStock.push(sValueTemp);
+
+        //{x: '2014-06-16', y: 30}
+        let sTemp = {x: json_v.quote[i].Date, y: json_v.quote[i].Close, label: {content: json_v.quote[i].Close} };
+        items.push(sTemp);
+      }
+
+
+      let dataset = new vis.DataSet(items);
+      let options = {
+        start: '2014-09-10',
+        end: '2015-03-10',
+        // start: '2015-12-31',
+        // end: '2016-01-01',
+        clickToUse: false,
+        drawPoints: {
+          enabled: true,
+          size: 5,
+          onRender: function(item, group, graph2d) {
+            // only renders items with labels
+            return item.label != null;
+          }
+        },
+        shaded: {
+          enabled: true
+        },
+        dataAxis: {
+          left: {
+            format: (value) => {return '' + value.toPrecision(4)}
+          },
+        },
+      };
+
+      let graph2d = new vis.Graph2d(container, dataset, options);
+
+      //show stock and news
+      graph2d.on('doubleClick', function (props) {
+        // text path svg rect
+        if(props.event.firstTarget.localName != 'text') {
+          return null;
+        }
+
+        let colseValue = props.event.firstTarget.textContent;
+        let yyyy = props.time.getFullYear();
+        let mm = padLeft(props.time.getMonth()+1,2);
+        let dd = padLeft(props.time.getDate(),2)
+        let dateStock = yyyy + '-' + mm + '-' + dd;
+        let dateNews = props.time.getFullYear() + '/' + (props.time.getMonth()+1) + '/' + props.time.getDate();
+
+        //find out the all news and stock price from aryNews and aryStock
+        aryTargetNews = [];
+        for(let i=0; i<aryNews.length; i++){
+            if(aryNews[i].datetime_local==dateNews){
+                aryTargetNews.push(aryNews[i]);
+            }
+        }
+
+        aryTargetStock = [];
+        for(let i=0; i<aryStock.length; i++){
+          if(aryStock[i].Date==dateStock){
+              aryTargetStock.push(aryStock[i]);
+          }
+        }
+
+        // prettyPrompt(dateNews + ' HTC Information',
+        //              aryTargetStock[0].content,
+        //              '',
+        //              ()=>{} );
+
+
+
+        
+
+
+      });
+    });
+
+
+    function padLeft(str, len) {
+        str = '' + str;
+        if (str.length >= len) {
+            return str;
+        } else {
+            return padLeft("0" + str, len);
+        }
+    }
+
+    function replaceHTML(text){
+      text = text.replace(/&lt;BR&gt;/g,'<BR>');
+      text = "<p style='text-align: left;'>" + text + "</p>"
+      return text;
+    }
+
+    function isEmptyObject(obj) {
+      for (var key in obj) {
+        return false;
+      }
+      return true;
+    }
+
+
+    // function prettyPrompt(title, text, inputValue, callback) {
+    //   var inputOptions = new Promise(function(resolve) {
+    //     let radios = {};
+    //     for(let i=0; i<aryTargetNews.length; i++){
+    //       radios = Object.defineProperty(radios,
+    //                                      `{ 'content': '<p style="text-align:left"> ${aryTargetNews[i].content} </p>', 'headline': '${aryTargetNews[i].headline}'}`,
+    //                                      { value : aryTargetNews[i].headline + '<br>',
+    //                                        writable : true,
+    //                                        enumerable : true,
+    //                                        configurable : true,
+    //                                        hasData: true});
+    //
+    //     }
+    //     // console.log(isEmptyObject(radios));
+    //     // if(isEmptyObject(radios))return null;
+    //     resolve(radios);
+    //   });
+    //
+    //
+    //   function getNewsRadios(){
+    //     return '<input type="radio" name="location" value="Taipei"> 台北<br>';
+    //   }
+    //
+    //
+    //   swal({
+    //     title: title,
+    //     // text: replaceHTML(text),
+    //     type: '',
+    //     showCancelButton: false,
+    //     allowOutsideClick: true,
+    //     width: '600px',
+    //     imageUrl: "http://cdn.gadgets360.com/content/assets/brands/htc.png?quality=80&output-format=jpg",
+    //     input: 'radio',
+    //     inputOptions: inputOptions,
+    //     html: replaceHTML(text),
+    //     // html: replaceHTML(text) + getNewsRadios(),
+    //     inputValidator: function(result) {
+    //       return new Promise(function(resolve, reject) {
+    //         if (result) {
+    //           resolve();
+    //         } else {
+    //           reject('You need to select a news.');
+    //         }
+    //       });
+    //     }
+    //
+    //   }, callback).then(function(result) {
+    //     if(result==null)return null;
+    //     eval('var obj=' + result)
+    //     swal({
+    //       title: obj.headline,
+    //       type: '',
+    //       text: obj.content,
+    //       width: '800px'
+    //     });
+    //   })
+    //
+    //
+    // }
+
+  });
+
+
+</script>
+</body>
+</html>
