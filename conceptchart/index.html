@@ -21,7 +21,13 @@
   <h1>Les Misérables Relationship</h1>
   <input type="button" onclick="focusRandom();" value="Focus on random node." style="width:300px;" id="btnFocus"><br/>
   <input type="button" onclick="fitAnimated();" value="View all." style="width:300px;" id="btnZoom"> <br/>
+  Node ID:<input type="text" id="MyNode" placeholder="10"/>
+  <input type="button" onclick="focusOne();" value="Focus on your node." style="width:300px;" id="btnFoucsOne"> <br/>
   <div id="mynetwork"></div>
+
+  <section>
+    <div id="eventSpan" />
+  </section>
 
   <script>
     let amountOfNodes = 0;
@@ -36,7 +42,8 @@
 
         //nodes
         for(let i = 0; i < json.nodes.length; i++){
-          let sTemp = {id: i, label: json.nodes[i].name, group: json.nodes[i].group};
+          // let sTemp = {id: i, label: json.nodes[i].name, group: json.nodes[i].group};
+          let sTemp = {id: i, label: i + '. ' + json.nodes[i].name, group: json.nodes[i].group};
           aryNodes.push(sTemp);
         }
 
@@ -94,6 +101,17 @@
         // let network = new vis.Network(container, data, options);
         network = new vis.Network(container, data, options);
 
+        //get node click
+        network.on("click", function (params) {
+
+          // document.getElementById('eventSpan').innerHTML = '<h2>Click event:</h2>' + JSON.stringify(params, null, 4);
+          //
+          // var MyNode = document.getElementById('MyNode');
+          // console.log(MyNode);
+          console.log(params);
+
+          focusOneByClick(params);
+        });
       });
     }
 
@@ -119,6 +137,32 @@
       // statusUpdateSpan.innerHTML = 'Doing fit() Animation.';
       // finishMessage = 'Animation finished.';
       network.fit({animation:options});
+    }
+
+    function focusOneByClick(params) {
+      let nodeId = params.nodes[0];
+      let options = {
+        scale: 2,
+        offset: {x:1,y:1},
+        animation: {
+          duration: 100,
+          easingFunction: 'easeInOutQuad'
+        }
+      };
+      network.focus(nodeId, options);
+    }
+
+    function focusOne(params) {
+      let nodeId = document.getElementById('MyNode').value;
+      let options = {
+        scale: 2,
+        offset: {x:1,y:1},
+        animation: {
+          duration: 100,
+          easingFunction: 'easeInOutQuad'
+        }
+      };
+      network.focus(nodeId, options);
     }
 
   </script>
