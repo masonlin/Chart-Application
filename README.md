@@ -1,5 +1,5 @@
 #  vis.js Application
-The [vis.js] (http://visjs.org/) is a lightweght visualization library, I use it to draw the dynamic and controllabel chart.
+The [vis.js] (http://visjs.org/) is a lightweght visualization library, I use it to draw the dynamic and controllable charts.
 --------------  
 1. Concept Map (conceptchart): Using the network chart of vis.js to draw the roles relationship of the Les Misérables.  
 ![cm] (https://github.com/masonlin/VISJS-Application/blob/master/conceptchart/img/show.png)  
