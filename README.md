@@ -16,4 +16,10 @@ The [vis.js] (http://visjs.org/) is a lightweght visualization library, I use it
   
   The [DEMO WEBSITE] (http://masonlin.co.nf/JobExam/timeline/index.html).   
 
+4.  New Trend Chart (newTendChart): Using the [C3.js] (http://c3js.org/) (Based on [D3.js] (https://d3js.org/)) lib to draw a stock trend and include a vex to show the popup information.
+![ntc] (https://github.com/masonlin/VISJS-Application/blob/master/newTendChart/img/show.png?raw=true)
+
+  The [DEMO WEBISTE] (http://masonlin.co.nf/JobExam/newtrendchart/index.html).  
+
+
 
